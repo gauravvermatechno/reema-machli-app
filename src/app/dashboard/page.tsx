@@ -215,9 +215,20 @@ export default function DashboardPage() {
     };
   }, [tasks]);
 
-  /* ---- Quotes ---- */
-  const dailyQuote = quotes[dailyQuoteIndex(quotes.length)];
-  const inspirationalQuote = quotes[(dailyQuoteIndex(quotes.length) + 7) % quotes.length];
+  /* ---- Rotating quotes (change every 30s) ---- */
+  const [topQuoteIdx, setTopQuoteIdx] = useState(() => dailyQuoteIndex(quotes.length));
+  const [bottomQuoteIdx, setBottomQuoteIdx] = useState(() => (dailyQuoteIndex(quotes.length) + 7) % quotes.length);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTopQuoteIdx((prev) => (prev + 1) % quotes.length);
+      setBottomQuoteIdx((prev) => (prev + 1) % quotes.length);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const dailyQuote = quotes[topQuoteIdx];
+  const inspirationalQuote = quotes[bottomQuoteIdx];
 
   /* ---- Logout ---- */
   function handleLogout() {
@@ -337,12 +348,15 @@ export default function DashboardPage() {
                   {format(new Date(), 'EEEE, d MMMM yyyy')}
                 </p>
               </div>
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-                className="max-w-md bg-teal-50 border border-teal-100 rounded-xl px-5 py-3"
-              >
+              <div className="max-w-md bg-teal-50 border border-teal-100 rounded-xl px-5 py-3 overflow-hidden">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={topQuoteIdx}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.5 }}
+                  >
                 <div className="flex items-start gap-2">
                   <Sparkles className="w-4 h-4 text-teal-500 mt-0.5 shrink-0" />
                   <div>
@@ -362,7 +376,9 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </div>
-              </motion.div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </div>
           </motion.div>
 
@@ -575,50 +591,59 @@ export default function DashboardPage() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/3" />
 
-            <div className="relative z-10 flex items-start gap-6">
-              {/* Portrait */}
-              <div className="shrink-0 hidden sm:block">
-                <div
-                  className="w-24 h-24 rounded-full p-0.5"
-                  style={{ background: inspirationalQuote.gradient }}
-                >
-                  <div className="relative w-full h-full rounded-full overflow-hidden bg-teal-800">
-                    <img
-                      src={inspirationalQuote.imageUrl}
-                      alt={inspirationalQuote.author}
-                      className="w-full h-full object-cover rounded-full"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                        if (fallback) fallback.style.display = 'flex';
-                      }}
-                    />
-                    <div
-                      className="absolute inset-0 items-center justify-center text-white text-2xl font-bold rounded-full"
-                      style={{ display: 'none', background: inspirationalQuote.gradient }}
-                    >
-                      {inspirationalQuote.author.split(' ').map((w: string) => w[0]).join('')}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={bottomQuoteIdx}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.6 }}
+                className="relative z-10 flex items-start gap-6"
+              >
+                {/* Portrait */}
+                <div className="shrink-0 hidden sm:block">
+                  <div
+                    className="w-24 h-24 rounded-full p-0.5"
+                    style={{ background: `linear-gradient(135deg, var(--tw-gradient-stops))` }}
+                  >
+                    <div className="relative w-full h-full rounded-full overflow-hidden bg-teal-800">
+                      <img
+                        src={inspirationalQuote.imageUrl}
+                        alt={inspirationalQuote.author}
+                        className="w-full h-full object-cover rounded-full"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                      <div
+                        className="absolute inset-0 items-center justify-center text-white text-2xl font-bold rounded-full bg-gradient-to-br from-teal-500 to-emerald-600"
+                        style={{ display: 'none' }}
+                      >
+                        {inspirationalQuote.author.split(' ').map((w: string) => w[0]).join('')}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              {/* Quote content */}
-              <div className="flex-1 min-w-0">
-                <QuoteIcon className="w-10 h-10 text-emerald-300/40 mb-4" />
-                <blockquote className="text-2xl md:text-3xl font-light text-white/95 italic leading-relaxed max-w-3xl">
-                  &ldquo;{inspirationalQuote.text}&rdquo;
-                </blockquote>
-                <div className="mt-6 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center sm:hidden">
-                    <Sparkles className="w-5 h-5 text-emerald-300" />
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold">{inspirationalQuote.author} {inspirationalQuote.emoji}</p>
-                    <p className="text-emerald-300/80 text-sm">{inspirationalQuote.role}</p>
+                {/* Quote content */}
+                <div className="flex-1 min-w-0">
+                  <QuoteIcon className="w-10 h-10 text-emerald-300/40 mb-4" />
+                  <blockquote className="text-2xl md:text-3xl font-light text-white/95 italic leading-relaxed max-w-3xl">
+                    &ldquo;{inspirationalQuote.text}&rdquo;
+                  </blockquote>
+                  <div className="mt-6 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center sm:hidden">
+                      <Sparkles className="w-5 h-5 text-emerald-300" />
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold">{inspirationalQuote.author} {inspirationalQuote.emoji}</p>
+                      <p className="text-emerald-300/80 text-sm">{inspirationalQuote.role}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
         </div>
       </main>
