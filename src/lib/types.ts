@@ -22,4 +22,8 @@ export interface Quote {
   author: string;
   role: string;
   imageUrl: string;
+  gradient: string;
+  emoji: string;
 }
+
+export const OWNERS = ['Reema', 'Jacek', 'J + R + Gosia', 'Team'] as const;

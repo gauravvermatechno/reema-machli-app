@@ -21,6 +21,7 @@ import {
 import { TaskStatus } from '@/lib/types';
 import { quotes, statusColors, statusEmoji } from '@/lib/data';
 import { useTasks } from '@/lib/useTasks';
+import SwimmingFish from '@/components/SwimmingFish';
 
 /* ------------------------------------------------------------------ */
 /*  Helper: deterministic daily quote index                           */
@@ -259,6 +260,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
+      <SwimmingFish />
       {/* ============ SIDEBAR ============ */}
       <aside className="w-64 shrink-0 bg-gradient-to-b from-teal-800 to-teal-950 text-white flex flex-col">
         {/* App name */}
@@ -347,9 +349,17 @@ export default function DashboardPage() {
                     <p className="text-sm text-teal-800 italic leading-relaxed">
                       &ldquo;{dailyQuote.text}&rdquo;
                     </p>
-                    <p className="text-xs text-teal-600 mt-1 font-medium">
-                      -- {dailyQuote.author}
-                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <img
+                        src={dailyQuote.imageUrl}
+                        alt={dailyQuote.author}
+                        className="w-10 h-10 rounded-full object-cover border-2 border-teal-200"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                      <p className="text-xs text-teal-600 font-medium">
+                        -- {dailyQuote.author} {dailyQuote.emoji}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -565,18 +575,47 @@ export default function DashboardPage() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/3" />
 
-            <div className="relative z-10">
-              <QuoteIcon className="w-10 h-10 text-emerald-300/40 mb-4" />
-              <blockquote className="text-2xl md:text-3xl font-light text-white/95 italic leading-relaxed max-w-3xl">
-                &ldquo;{inspirationalQuote.text}&rdquo;
-              </blockquote>
-              <div className="mt-6 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-emerald-300" />
+            <div className="relative z-10 flex items-start gap-6">
+              {/* Portrait */}
+              <div className="shrink-0 hidden sm:block">
+                <div
+                  className="w-24 h-24 rounded-full p-0.5"
+                  style={{ background: inspirationalQuote.gradient }}
+                >
+                  <div className="relative w-full h-full rounded-full overflow-hidden bg-teal-800">
+                    <img
+                      src={inspirationalQuote.imageUrl}
+                      alt={inspirationalQuote.author}
+                      className="w-full h-full object-cover rounded-full"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                    <div
+                      className="absolute inset-0 items-center justify-center text-white text-2xl font-bold rounded-full"
+                      style={{ display: 'none', background: inspirationalQuote.gradient }}
+                    >
+                      {inspirationalQuote.author.split(' ').map(w => w[0]).join('')}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-white font-semibold">{inspirationalQuote.author}</p>
-                  <p className="text-emerald-300/80 text-sm">{inspirationalQuote.role}</p>
+              </div>
+              {/* Quote content */}
+              <div className="flex-1 min-w-0">
+                <QuoteIcon className="w-10 h-10 text-emerald-300/40 mb-4" />
+                <blockquote className="text-2xl md:text-3xl font-light text-white/95 italic leading-relaxed max-w-3xl">
+                  &ldquo;{inspirationalQuote.text}&rdquo;
+                </blockquote>
+                <div className="mt-6 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center sm:hidden">
+                    <Sparkles className="w-5 h-5 text-emerald-300" />
+                  </div>
+                  <div>
+                    <p className="text-white font-semibold">{inspirationalQuote.author} {inspirationalQuote.emoji}</p>
+                    <p className="text-emerald-300/80 text-sm">{inspirationalQuote.role}</p>
+                  </div>
                 </div>
               </div>
             </div>

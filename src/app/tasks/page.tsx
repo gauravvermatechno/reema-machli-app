@@ -24,9 +24,10 @@ import {
   ChevronUp,
   Menu,
 } from 'lucide-react';
-import { Task, SubTask, TaskStatus } from '@/lib/types';
+import { Task, SubTask, TaskStatus, OWNERS } from '@/lib/types';
 import { statusColors } from '@/lib/data';
 import { useTasks } from '@/lib/useTasks';
+import SwimmingFish from '@/components/SwimmingFish';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -299,6 +300,9 @@ function TaskModal({
 }) {
   const isEdit = task !== null;
   const [owner, setOwner] = useState(task?.owner ?? '');
+  const [isCustomOwner, setIsCustomOwner] = useState(
+    task?.owner ? !(OWNERS as readonly string[]).includes(task.owner) : false,
+  );
   const [action, setAction] = useState(task?.action ?? '');
   const [deadline, setDeadline] = useState(task?.deadline ?? '');
   const [deadlineDateStr, setDeadlineDateStr] = useState(
@@ -382,14 +386,38 @@ function TaskModal({
             >
               Owner
             </label>
-            <input
+            <select
               id="task-owner"
-              type="text"
-              value={owner}
-              onChange={(e) => setOwner(e.target.value)}
-              placeholder="e.g. Reema"
+              value={isCustomOwner ? '__other__' : owner}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === '__other__') {
+                  setIsCustomOwner(true);
+                  setOwner('');
+                } else {
+                  setIsCustomOwner(false);
+                  setOwner(val);
+                }
+              }}
               className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-500/20"
-            />
+            >
+              <option value="">Select owner</option>
+              {OWNERS.map((o) => (
+                <option key={o} value={o}>
+                  {o}
+                </option>
+              ))}
+              <option value="__other__">Other...</option>
+            </select>
+            {isCustomOwner && (
+              <input
+                type="text"
+                value={owner}
+                onChange={(e) => setOwner(e.target.value)}
+                placeholder="Enter custom owner name"
+                className="mt-2 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-500/20"
+              />
+            )}
           </div>
 
           {/* Action */}
@@ -1090,6 +1118,7 @@ export default function TasksPage() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
+      <SwimmingFish />
       <Sidebar
         mobileOpen={mobileSidebar}
         onCloseMobile={() => setMobileSidebar(false)}
