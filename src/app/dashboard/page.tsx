@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { TaskStatus } from '@/lib/types';
 import { quotes, statusColors, statusEmoji } from '@/lib/data';
+import { bengaliQuotes } from '@/lib/quotes';
 import { useTasks } from '@/lib/useTasks';
 import SwimmingFish from '@/components/SwimmingFish';
 
@@ -215,20 +216,28 @@ export default function DashboardPage() {
     };
   }, [tasks]);
 
-  /* ---- Rotating quotes (change every 30s) ---- */
+  /* ---- Rotating quotes (change every 30s, 1 in 3 Bengali) ---- */
   const [topQuoteIdx, setTopQuoteIdx] = useState(() => dailyQuoteIndex(quotes.length));
   const [bottomQuoteIdx, setBottomQuoteIdx] = useState(() => (dailyQuoteIndex(quotes.length) + 7) % quotes.length);
+  const [topBengaliIdx, setTopBengaliIdx] = useState(0);
+  const [bottomBengaliIdx, setBottomBengaliIdx] = useState(Math.floor(bengaliQuotes.length / 2));
+  const [tickCount, setTickCount] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
+      setTickCount((c) => c + 1);
       setTopQuoteIdx((prev) => (prev + 1) % quotes.length);
       setBottomQuoteIdx((prev) => (prev + 1) % quotes.length);
-    }, 30000);
+      setTopBengaliIdx((prev) => (prev + 1) % bengaliQuotes.length);
+      setBottomBengaliIdx((prev) => (prev + 1) % bengaliQuotes.length);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  const dailyQuote = quotes[topQuoteIdx];
-  const inspirationalQuote = quotes[bottomQuoteIdx];
+  // Every 3rd tick, show a Bengali quote instead
+  const isBengaliTick = tickCount % 3 === 2;
+  const dailyQuote = isBengaliTick ? bengaliQuotes[topBengaliIdx] : quotes[topQuoteIdx];
+  const inspirationalQuote = isBengaliTick ? bengaliQuotes[bottomBengaliIdx] : quotes[bottomQuoteIdx];
 
   /* ---- Logout ---- */
   function handleLogout() {
