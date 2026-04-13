@@ -597,7 +597,7 @@ export default function DashboardPage() {
                       className="absolute inset-0 items-center justify-center text-white text-2xl font-bold rounded-full"
                       style={{ display: 'none', background: inspirationalQuote.gradient }}
                     >
-                      {inspirationalQuote.author.split(' ').map(w => w[0]).join('')}
+                      {inspirationalQuote.author.split(' ').map((w: string) => w[0]).join('')}
                     </div>
                   </div>
                 </div>
