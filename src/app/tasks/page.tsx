@@ -25,13 +25,13 @@ import {
   Menu,
 } from 'lucide-react';
 import { Task, SubTask, TaskStatus } from '@/lib/types';
-import { initialTasks, statusColors } from '@/lib/data';
+import { statusColors } from '@/lib/data';
+import { useTasks } from '@/lib/useTasks';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const STORAGE_KEY = 'reema-tasks';
 const AUTH_KEY = 'reema-auth';
 const ALL_STATUSES: TaskStatus[] = [
   'New',
@@ -60,32 +60,6 @@ function getOwnerColor(owner: string): string {
 
 function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-}
-
-// ---------------------------------------------------------------------------
-// Persistence helpers
-// ---------------------------------------------------------------------------
-
-function loadTasks(): Task[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as Task[];
-      return parsed.map((t) => ({
-        ...t,
-        deadlineDate: t.deadlineDate ? new Date(t.deadlineDate) : null,
-      }));
-    }
-  } catch {
-    // ignore
-  }
-  return initialTasks;
-}
-
-function saveTasks(tasks: Task[]): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 }
 
 // ---------------------------------------------------------------------------
@@ -914,8 +888,8 @@ function TaskRow({
 
 export default function TasksPage() {
   const router = useRouter();
+  const { tasks, updateTasks, loading } = useTasks();
   const [isMounted, setIsMounted] = useState(false);
-  const [tasks, setTasks] = useState<Task[]>([]);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [filterOwner, setFilterOwner] = useState<string>('All');
@@ -929,25 +903,15 @@ export default function TasksPage() {
   const [modalTask, setModalTask] = useState<Task | null | undefined>(undefined); // undefined = closed
   const [deleteTarget, setDeleteTarget] = useState<Task | null>(null);
 
-  // Auth guard + initial load
+  // Auth guard
   useEffect(() => {
     const auth = localStorage.getItem(AUTH_KEY);
     if (auth !== 'authenticated') {
       router.replace('/');
       return;
     }
-    setTasks(loadTasks());
     setIsMounted(true);
   }, [router]);
-
-  // Persist on every change
-  const updateTasks = useCallback((updater: (prev: Task[]) => Task[]) => {
-    setTasks((prev) => {
-      const next = updater(prev);
-      saveTasks(next);
-      return next;
-    });
-  }, []);
 
   // Unique owners
   const owners = useMemo(() => {
@@ -1112,7 +1076,7 @@ export default function TasksPage() {
     return { total, done, inProgress, overdue };
   }, [tasks]);
 
-  if (!isMounted) {
+  if (!isMounted || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <motion.div

@@ -18,8 +18,9 @@ import {
   Quote as QuoteIcon,
   Fish,
 } from 'lucide-react';
-import { Task, TaskStatus } from '@/lib/types';
-import { initialTasks, quotes, statusColors, statusEmoji } from '@/lib/data';
+import { TaskStatus } from '@/lib/types';
+import { quotes, statusColors, statusEmoji } from '@/lib/data';
+import { useTasks } from '@/lib/useTasks';
 
 /* ------------------------------------------------------------------ */
 /*  Helper: deterministic daily quote index                           */
@@ -154,7 +155,7 @@ function StatusBadge({ status }: { status: TaskStatus }) {
 export default function DashboardPage() {
   const router = useRouter();
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const { tasks, loading } = useTasks();
   const [activePath, setActivePath] = useState('/dashboard');
 
   /* ---- Auth guard ---- */
@@ -166,27 +167,6 @@ export default function DashboardPage() {
       setIsAuthed(true);
     }
   }, [router]);
-
-  /* ---- Load tasks from localStorage or seed initial ---- */
-  useEffect(() => {
-    if (!isAuthed) return;
-    const stored = localStorage.getItem('reema-tasks');
-    if (stored) {
-      try {
-        const parsed: Task[] = JSON.parse(stored, (key, value) => {
-          if (key === 'deadlineDate' && value !== null) return new Date(value);
-          return value;
-        });
-        setTasks(parsed);
-      } catch {
-        setTasks(initialTasks);
-        localStorage.setItem('reema-tasks', JSON.stringify(initialTasks));
-      }
-    } else {
-      setTasks(initialTasks);
-      localStorage.setItem('reema-tasks', JSON.stringify(initialTasks));
-    }
-  }, [isAuthed]);
 
   /* ---- Derived stats ---- */
   const stats = useMemo(() => {
@@ -245,7 +225,7 @@ export default function DashboardPage() {
   }
 
   /* ---- Loading guard ---- */
-  if (isAuthed === null) {
+  if (isAuthed === null || loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-50">
         <motion.div
