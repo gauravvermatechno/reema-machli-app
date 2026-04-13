@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <title>Offline - Machli</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f0fdfa;
+      color: #134e4a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 1.5rem;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 400px;
+    }
+
+    .icon-wrapper {
+      width: 96px;
+      height: 96px;
+      margin: 0 auto 1.5rem;
+      background: #0f766e;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-wrapper svg {
+      width: 48px;
+      height: 48px;
+      fill: none;
+      stroke: white;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #0f766e;
+    }
+
+    p {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #5f7a78;
+      margin-bottom: 1.5rem;
+    }
+
+    .retry-btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: #0f766e;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.2s ease;
+    }
+
+    .retry-btn:hover {
+      background: #0d9488;
+    }
+
+    .retry-btn:active {
+      background: #115e59;
+    }
+
+    .brand {
+      margin-top: 2rem;
+      font-size: 0.875rem;
+      color: #99b3b1;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon-wrapper">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12"/>
+        <line x1="1" y1="1" x2="23" y2="23"/>
+      </svg>
+    </div>
+    <h1>You're offline</h1>
+    <p>It looks like you've lost your internet connection. Please check your network and try again.</p>
+    <button class="retry-btn" onclick="window.location.reload()">Try again</button>
+    <div class="brand">Machli - Reema's Action Tracker</div>
+  </div>
+</body>
+</html>
